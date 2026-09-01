@@ -1,0 +1,32 @@
+name: CI
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    name: Lint y verificación básica
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Instalar dependencias para lint
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+          npm install -g markdownlint-cli
+
+      - name: ShellCheck en scripts
+        run: |
+          if ls **/*.sh 1> /dev/null 2>&1; then
+            find . -name "*.sh" -not -path "./.git/*" -print0 | xargs -0 shellcheck || true
+          else
+            echo "No se encontraron scripts .sh"
+          fi
+
+      - name: Markdown lint en README y documentación
+        run: |
+          markdownlint README.md || true
